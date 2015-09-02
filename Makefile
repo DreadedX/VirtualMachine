@@ -70,11 +70,11 @@ build/header/$(CONFIG)/$(TYPE)/Standard.h.gch: $(HEADERS) $(HEADERS_LIBS)
 
 run:
 	@echo "Running: $(NAME)"
-	@cd sandbox; ./../$(NAME) test.asm test.bin
+	@cd sandbox; ./../$(NAME)
 
 debug:
 	@echo "Running: $(NAME) (using gdb)"
-	@cd sandbox; gdb -ex run -ex bt -ex quit --silent --args ../$(NAME) test.asm test.bin
+	@cd sandbox; gdb -ex run -ex bt -ex quit --silent --args ../$(NAME)
 
 valgrind:
 	@# TODO: Make this work

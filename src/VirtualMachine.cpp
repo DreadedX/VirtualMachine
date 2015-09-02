@@ -1,7 +1,8 @@
 #include "Standard.h"
 
-byte mRegister0;
-byte mRegister1;
+#define REGISTER_COUNT 2
+
+word mRegisters[REGISTER_COUNT];
 
 bool mStatus;
 bool mOverflow;
@@ -15,8 +16,11 @@ int mTemp;
 
 void reset() {
 
-    mRegister0 = 0x00;
-    mRegister1 = 0x00;
+    for (int i = 0; i < REGISTER_COUNT; i++) {
+    	
+	mRegisters[i] = 0x00;
+    }
+
 
     mStatus = true;
     mOverflow = false;
@@ -30,10 +34,12 @@ void reset() {
 
 void dumpRegisters() {
 
-    std::cout << "Registers:" << std::endl
-	<< "register0 [" << +mRegister0 << "]" << std::endl
-	<< "register1 [" << +mRegister1 << "]" << std::endl
-	<< "status [" << mStatus << "]" << std::endl
+    std::cout << "Registers:" << std::endl;
+	for (int i = 0; i < REGISTER_COUNT; i++) {
+
+	    std::cout << "register" << i << " [" << mRegisters[i] << "]" << std::endl;
+	}
+	std::cout << "status [" << mStatus << "]" << std::endl
 	<< "overflow [" << mOverflow << "]" << std::endl
 	<< "underflow [" << mUnderflow << "]" << std::endl
 	<< "programCounter [" << +mProgramCounter << "]" << std::endl
@@ -49,21 +55,16 @@ void fault() {
     dumpRegisters();
 }
 
-void doLoad0(std::vector<byte> &mProgram) {
+void doLoad(std::vector<byte> &mProgram) {
 
-    mRegister0 = mProgram[mProgramCounter];
-    mProgramCounter++;
-}
+    mRegisters[mProgram[mProgramCounter]] = mProgram[mProgramCounter+1];
 
-void doLoad1(std::vector<byte> &mProgram) {
-
-    mRegister1 = mProgram[mProgramCounter];
-    mProgramCounter++;
+    mProgramCounter += 2;
 }
 
 void doAdd() {
 
-    mTemp = mRegister0 + mRegister1;
+    mTemp = mRegisters[0] + mRegisters[1];
 
     if (mTemp > 255) {
 
@@ -71,12 +72,12 @@ void doAdd() {
 	mTemp = 255;
     }
 
-    mRegister0 = mTemp;
+    mRegisters[0] = mTemp;
 }
 
 void doSub() {
 
-    mTemp = mRegister0 - mRegister1;
+    mTemp = mRegisters[0] - mRegisters[1];
 
     if (mTemp < 0) {
 
@@ -84,19 +85,14 @@ void doSub() {
 	mTemp = 0;
     }
 
-    mRegister0 = mTemp;
+    mRegisters[0] = mTemp;
 }
 
-void doStore0(std::vector<byte> &mProgram) {
+void doStore(std::vector<byte> &mProgram) {
 
-    mProgram[mProgramCounter] = mRegister0;
-    mProgramCounter++;
-}
+    mProgram[mProgramCounter+1] = mRegisters[mProgram[mProgramCounter]];
 
-void doStore1(std::vector<byte> &mProgram) {
-
-    mProgram[mProgramCounter] = mRegister1;
-    mProgramCounter++;
+    mProgramCounter += 2;
 }
 
 void VirtualMachine::execute(std::vector<byte> &mProgram) {
@@ -115,12 +111,8 @@ void VirtualMachine::execute(std::vector<byte> &mProgram) {
 	mProgramCounter++;
 
 	switch (mInstructionRegister) {
-	    case LD0:
-		doLoad0(mProgram);
-		break;
-
-	    case LD1:
-		doLoad1(mProgram);
+	    case LDT:
+		doLoad(mProgram);
 		break;
 
 	    case ADD:
@@ -131,8 +123,8 @@ void VirtualMachine::execute(std::vector<byte> &mProgram) {
 		doSub();
 		break;
 
-	    case ST0:
-		doStore0(mProgram);
+	    case STT:
+		doStore(mProgram);
 		break;
 
 	    default:
@@ -141,6 +133,11 @@ void VirtualMachine::execute(std::vector<byte> &mProgram) {
 	}
     }
 
-    std::cout << std::endl;
     dumpRegisters();
+
+    std::cout << "Program: " << std::endl;
+    for (uint i = 0; i < mProgram.size(); i++) {
+
+	std::cout << i << " [" << +mProgram[i] << "]" << std::endl;
+    }
 }

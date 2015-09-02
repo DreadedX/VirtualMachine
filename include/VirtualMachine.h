@@ -8,12 +8,10 @@ namespace VirtualMachine {
 
 enum InstructionSet {
 
-    LD0 = 0,
-    LD1,
+    LDT = 0,
     ADD,
     SUB,
-    ST0,
-    ST1
+    STT
 };
 
 #endif
