@@ -55,7 +55,7 @@ void fault() {
     dumpRegisters();
 }
 
-void doLoad(std::vector<byte> &mProgram) {
+void doLoad(std::vector<word> &mProgram) {
 
     mRegisters[mProgram[mProgramCounter]] = mProgram[mProgramCounter+1];
 
@@ -88,14 +88,43 @@ void doSub() {
     mRegisters[0] = mTemp;
 }
 
-void doStore(std::vector<byte> &mProgram) {
+void doStore(std::vector<word> &mProgram) {
 
     mProgram[mProgramCounter+1] = mRegisters[mProgram[mProgramCounter]];
 
     mProgramCounter += 2;
 }
 
-void VirtualMachine::execute(std::vector<byte> &mProgram) {
+void doJump(std::vector<word> &mProgram) {
+
+    mProgramCounter = mProgram[mProgramCounter];
+}
+
+void doIf(std::vector<word> &mProgram) {
+
+    if(mRegisters[0] != mRegisters[1]) {
+	
+	// Skip next X instructions if register 0 is not equal to register 1
+	mProgramCounter += mProgram[mProgramCounter] + 1;
+    } else {
+
+	mProgramCounter++;
+    }
+}
+
+void doNotIf(std::vector<word> &mProgram) {
+
+    if(mRegisters[0] == mRegisters[1]) {
+	
+	// Skip next X instructions if register 0 is equal to register 1
+	mProgramCounter += mProgram[mProgramCounter] + 1;
+    } else {
+
+	mProgramCounter++;
+    }
+}
+
+void VirtualMachine::execute(std::vector<word> &mProgram) {
 
     reset();
 
@@ -108,6 +137,9 @@ void VirtualMachine::execute(std::vector<byte> &mProgram) {
     while (mProgramCounter < mProgram.size()) {
 
 	mInstructionRegister = mProgram[mProgramCounter];
+
+	std::cout << +mProgramCounter << " " << +mInstructionRegister << std::endl;
+	
 	mProgramCounter++;
 
 	switch (mInstructionRegister) {
@@ -126,6 +158,19 @@ void VirtualMachine::execute(std::vector<byte> &mProgram) {
 	    case STT:
 		doStore(mProgram);
 		break;
+
+	    case JMP:
+		doJump(mProgram);
+		break;
+
+	    case IFE:
+		doIf(mProgram);
+		break;
+
+	    case IFN:
+		doNotIf(mProgram);
+		break;
+
 
 	    default:
 		fault();

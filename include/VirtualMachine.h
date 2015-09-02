@@ -3,7 +3,7 @@
 
 namespace VirtualMachine {
 
-    void execute(std::vector<byte> &mProgram);
+    void execute(std::vector<word> &mProgram);
 };
 
 enum InstructionSet {
@@ -11,7 +11,10 @@ enum InstructionSet {
     LDT = 0,
     ADD,
     SUB,
-    STT
+    STT,
+    JMP,
+    IFE,
+    IFN
 };
 
 #endif
